@@ -6,12 +6,13 @@ def readme():
         return f.read()
 setuptools.setup(
     name='amwater',
-    version='0.0.1',
+    version='0.0.2',
     packages=find_packages(),
     url='https://github.com/samapriya/amwater',
     install_requires=['requests>=2.26.0',
     'lxml>=4.6.3',
     'beautifulsoup4>=4.9.3',
+    'dateparser>=1.0.0',
     'shapely>=1.6.4;platform_system!="Windows"',],
     license='Apache 2.0',
     long_description=open('README.md').read(),

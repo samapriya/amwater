@@ -21,6 +21,7 @@ import sys
 import os
 import json
 import platform
+import dateparser
 import subprocess
 from os.path import expanduser
 from datetime import datetime, timedelta
@@ -154,27 +155,34 @@ def setup_from_parser(args):
 
 # Parse Geometry from alert url
 def geometry_parse(alert_url):
-    alert_detail = requests.get(alert_url)
-    soup = BeautifulSoup(alert_detail.text, "xml")
-    alert_geom = soup.find_all("script", type="text/javascript")
-    for geoms in alert_geom:
-        try:
-            # start = datetime.strptime(start, "%Y-%m-%d")
-            aoi_geometry = (
-                geoms.text.split("var areaLocations = ")[1]
-                .split(";")[0]
-                .split('"')[1]
-                .split('"')[0]
-            )
-        except Exception as e:
-            pass
-    if not "POLYGON" in aoi_geometry:
-        aoi_geometry = "POLYGON" + (aoi_geometry)
-    return aoi_geometry
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36"
+    }
+    try:
+        alert_detail = requests.get(alert_url, headers=headers)
+    except Exception as e:
+        pass
+    if alert_detail.status_code==200:
+        soup = BeautifulSoup(alert_detail.text, "xml")
+        alert_geom = soup.find_all("script", type="text/javascript")
+        for geoms in alert_geom:
+            try:
+                # start = datetime.strptime(start, "%Y-%m-%d")
+                aoi_geometry = (
+                    geoms.text.split("var areaLocations = ")[1]
+                    .split(";")[0]
+                    .split('"')[1]
+                    .split('"')[0]
+                )
+            except Exception as e:
+                pass
+        if not "POLYGON" in aoi_geometry:
+            aoi_geometry = "POLYGON" + (aoi_geometry)
+        return aoi_geometry
 
 
 # Water Alert from Ameren
-def water_alert(n, place):
+def water_alert(n, place, webhook):
     home = expanduser("~/amwater.json")
     if place is None:
         if not os.path.exists(home):
@@ -187,6 +195,10 @@ def water_alert(n, place):
             with open(home) as json_file:
                 data = json.load(json_file)
                 place = data.get("home")
+    if webhook is None:
+        with open(home) as json_file:
+            data = json.load(json_file)
+            webhook = data.get("webhook")
     alert_list = requests.get(MAIN_URL)
     soup = BeautifulSoup(alert_list.text, "xml")
     alert_time = soup.find_all("AlertTime")
@@ -230,7 +242,7 @@ def water_alert(n, place):
         f"Now processing for {place} from {str(datetime.now() - timedelta(n)).split(' ')[0]} onwards"
         + "\n"
     )
-
+    alert_object = []
     for i in range(0, len(alert_time)):
         dt = datetime.now() - timedelta(n)
         dt = datetime.strptime(str(dt).split(" ")[0], "%Y-%m-%d")
@@ -239,10 +251,22 @@ def water_alert(n, place):
         try:
             alert_geom = shapely.wkt.loads(geometry_parse(alert_link[i].get_text()))
             if start_time >= dt and alert_geom.intersects(boundary_poly):
-                print("Start Time: {}".format(str(start_time).split(" ")[0]))
+                print(
+                    "Start Time: {}".format(
+                        str(
+                            dateparser.parse(alert_time[i].get_text()).strftime(
+                                "%Y/%m/%d %I:%M:%S%p"
+                            )
+                        )
+                    )
+                )
                 print(
                     "Expiration Time: {}".format(
-                        expiration_time[i].get_text().split("T")[0]
+                        str(
+                            dateparser.parse(expiration_time[i].get_text()).strftime(
+                                "%Y/%m/%d %I:%M:%S%p"
+                            )
+                        )
                     )
                 )
                 print("Alert ID: {}".format(alert_id[i].get_text()))
@@ -250,23 +274,72 @@ def water_alert(n, place):
                 print("Alert Link: {}".format(alert_link[i].get_text()))
                 print("Alert Message: {}".format(alert_message[i].get_text()).strip())
                 alert_count.append(str(start_time).split(" ")[0])
+                alert_object.append(
+                    dict(
+                        start_time=str(
+                            dateparser.parse(alert_time[i].get_text()).strftime(
+                                "%Y/%m/%d %I:%M:%S%p"
+                            )
+                        ),
+                        expiration_time=str(
+                            dateparser.parse(expiration_time[i].get_text()).strftime(
+                                "%Y/%m/%d %I:%M:%S%p"
+                            )
+                        ),
+                        alert_id=alert_id[i].get_text(),
+                        alert_link=alert_link[i].get_text(),
+                    )
+                )
                 print("")
             else:
                 alert_miss.append(str(start_time).split(" ")[0])
         except Exception as e:
             print(e)
+
+    if webhook is not None and len(webhook) > 0:
+        for items in alert_object:
+            block_segment = []
+            block_segment.append(
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"Amwater Alert Notification\nFor address:  {place}\nusing amwater {pkg_resources.get_distribution('amwater').version}",
+                    },
+                    "accessory": {
+                        "type": "image",
+                        "image_url": "https://user-images.githubusercontent.com/6677629/135684791-76d20beb-e51b-435d-a802-80d10ba99fe2.jpg",
+                        "alt_text": "Alert Flag",
+                    },
+                }
+            )
+            key_value = [f"{key} : {value}" for key, value in items.items()]
+            string = ",\n".join(key_value)
+            # print(string)
+            block_segment.append(
+                {"type": "section", "text": {"type": "mrkdwn", "text": string}}
+            )
+
+            payload = {
+                "text": "Amwater Alert Notification Alert",
+                "blocks": block_segment,
+            }
+            headers = {"Content-type": "application/json"}
+            response = requests.post(webhook, headers=headers, data=json.dumps(payload))
+            if response.status_code != 200:
+                print(
+                    f"Slack notification failed with status code: {response.status_code}"
+                )
     print("\n" + "Total alerts for {} : {}".format(place, len(alert_count)))
     print("Total alerts unrelated to {} : {}".format(place, len(alert_miss)))
 
 
 def check_from_parser(args):
-    water_alert(n=args.days, place=args.address)
+    water_alert(n=args.days, place=args.address, webhook=args.webhook)
 
 
 def main(args=None):
-    parser = argparse.ArgumentParser(
-        description="Alert CLI for American water"
-    )
+    parser = argparse.ArgumentParser(description="Alert CLI for American water")
     subparsers = parser.add_subparsers()
 
     parser_setup = subparsers.add_parser(
@@ -281,12 +354,17 @@ def main(args=None):
     parser_setup.set_defaults(func=setup_from_parser)
 
     parser_check = subparsers.add_parser(
-        "amcheck", help="Check for any american water issued alerts for given adddress"
+        "check", help="Check for any american water issued alerts for given adddress"
     )
     optional_named = parser_check.add_argument_group("Optional named arguments")
     optional_named.add_argument("--address", help="Your address", default=None)
     optional_named.add_argument(
         "--days", help="Number of days to check for alert default is 1 day", default=1
+    )
+    optional_named.add_argument(
+        "--webhook",
+        help="Slack webhook to send alert link (experimental)",
+        default=None,
     )
     parser_check.set_defaults(func=check_from_parser)
 
