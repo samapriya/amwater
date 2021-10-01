@@ -1,42 +1,42 @@
-# pyspotter: Simple CLI for SofarOcean API
+# amwater: Simple CLI for SofarOcean API
 
-![](https://tokei.rs/b1/github/samapriya/pyspotter?category=code)
-![](https://tokei.rs/b1/github/samapriya/pyspotter?category=files)
-[![CI pyspotter](https://github.com/samapriya/pyspotter/actions/workflows/package_ci.yml/badge.svg)](https://github.com/samapriya/pyspotter/actions/workflows/package_ci.yml)
-![PyPI - License](https://img.shields.io/pypi/l/pyspotter)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/pyspotter)
-![PyPI](https://img.shields.io/pypi/v/pyspotter)
+![](https://tokei.rs/b1/github/samapriya/amwater?category=code)
+![](https://tokei.rs/b1/github/samapriya/amwater?category=files)
+[![CI amwater](https://github.com/samapriya/amwater/actions/workflows/package_ci.yml/badge.svg)](https://github.com/samapriya/amwater/actions/workflows/package_ci.yml)
+![PyPI - License](https://img.shields.io/pypi/l/amwater)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/amwater)
+![PyPI](https://img.shields.io/pypi/v/amwater)
 
 
 ## Table of contents
 * [Installation](#installation)
 * [Getting started](#getting-started)
-* [pyspotter Simple CLI for Sofarocean API](#pyspotter-simple-cli-for-sofarocean-api)
-    * [pyspotter auth](#pyspotter-auth)
-    * [pyspotter reset](#pyspotter-reset)
-    * [pyspotter devlist](#pyspotter-devlist)
-    * [pyspotter spotcheck](#pyspotter-spotcheck)
-    * [pyspotter spotdata](#pyspotter-spotdata)
+* [amwater Simple CLI for Sofarocean API](#amwater-simple-cli-for-sofarocean-api)
+    * [amwater auth](#amwater-auth)
+    * [amwater reset](#amwater-reset)
+    * [amwater devlist](#amwater-devlist)
+    * [amwater spotcheck](#amwater-spotcheck)
+    * [amwater spotdata](#amwater-spotdata)
 
 ## Installation
 This assumes that you have native python & pip installed in your system, you can test this by going to the terminal (or windows command prompt) and trying
 
 ```python``` and then ```pip list```
 
-**pyspotter only support Python v3.4 or higher**
+**amwater only support Python v3.4 or higher**
 
-To install **pyspotter: Simple CLI for SofarOcean API** you can install using two methods.
+To install **amwater: Simple CLI for SofarOcean API** you can install using two methods.
 
-```pip install pyspotter```
+```pip install amwater```
 
 or you can also try
 
 ```
-git clone https://github.com/samapriya/pyspotter.git
-cd pyspotter
+git clone https://github.com/samapriya/amwater.git
+cd amwater
 python setup.py install
 ```
-For Linux use sudo or try ```pip install pyspotter --user```.
+For Linux use sudo or try ```pip install amwater --user```.
 
 I recommend installation within a virtual environment. Find more information on [creating virtual environments here](https://docs.python.org/3/library/venv.html).
 
@@ -45,8 +45,8 @@ I recommend installation within a virtual environment. Find more information on 
 As usual, to print help:
 
 ```
-pyspotter -h
-usage: pyspotter [-h] {auth,reset,devlist,spot-check,spot-data} ...
+amwater -h
+usage: amwater [-h] {auth,reset,devlist,spot-check,spot-data} ...
 
 Simple CLI for Sofarocean API
 
@@ -62,26 +62,26 @@ optional arguments:
   -h, --help            show this help message and exit
 ```
 
-To obtain help for specific functionality, simply call it with _help_ switch, e.g.: `pyspotter spot-check -h`. If you didn't install pyspotter, then you can run it just by going to *pyspotter* directory and running `python pyspotter.py [arguments go here]`
+To obtain help for specific functionality, simply call it with _help_ switch, e.g.: `amwater spot-check -h`. If you didn't install amwater, then you can run it just by going to *amwater* directory and running `python amwater.py [arguments go here]`
 
-## pyspotter Simple CLI for Sofarocean API
+## amwater Simple CLI for Sofarocean API
 The tool is designed to interact with the SofarOcean API, for now this is focused only on the spotter endpoints.
 
-### pyspotter auth
+### amwater auth
 This allows you to save your authentication token, this is then used for authentication for requests. This uses your email and your password to fetch the token.
 
-``` pyspotter auth```
+``` amwater auth```
 
-### pyspotter reset
+### amwater reset
 For some reason if you need to reset your token , this will allow you to use your current authentication to reset and fetch your new token. This requires no user input
 
-```pyspotter reset```
+```amwater reset```
 
-### pyspotter devlist
+### amwater devlist
 This will simply print the names of all devices to which you have access, instead of trying to remember the list. This tool requires no user input.
 
 ```
-usage: pyspotter devlist [-h]
+usage: amwater devlist [-h]
 
 optional arguments:
   -h, --help  show this help message and exit
@@ -90,16 +90,16 @@ optional arguments:
 
 usage is simply
 
-```pyspotter devlist```
+```amwater devlist```
 
 
-### pyspotter spotcheck
+### amwater spotcheck
 This tool is built to fetch simply the latest information from the spotter including battery, humidity, power and lat long. Since these spotter can move across multiple time zones, it uses the lat long to estimate the time zone and converts the UTC time to local time for the spotter.
 
 ```
-pyspotter spot-check -h
+amwater spot-check -h
 
-usage: pyspotter spot-check [-h] --sid SID
+usage: amwater spot-check [-h] --sid SID
 
 optional arguments:
   -h, --help  show this help message and exit
@@ -111,15 +111,15 @@ Required named arguments.:
 Example usage would be
 
 ```
-pyspotter spot-check --sid 0320
+amwater spot-check --sid 0320
 ```
 
 
-### pyspotter spotdata
+### amwater spotdata
 This tool was designed to get the datasets out of the spotter. It seems that API currently returns about a month of data, and the best way to group it was using dates. This script uses the result JSON objects, and adds a date field from the timestamp to make the grouping easy, since timestamps are unique. This then writes these CSV file with column headers and can export both wind and wave data as needed.
 
 ```
-usage: pyspotter spot-data [-h] --sid SID --dtype DTYPE --folder FOLDER
+usage: amwater spot-data [-h] --sid SID --dtype DTYPE --folder FOLDER
 
 optional arguments:
   -h, --help       show this help message and exit
@@ -134,7 +134,7 @@ Required named arguments.:
 Sample setup would be
 
 ```
-pyspotter spot-data --sid 1234 --dtype wave --folder "full path to folder"
+amwater spot-data --sid 1234 --dtype wave --folder "full path to folder"
 ```
 
 

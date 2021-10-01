@@ -1,4 +1,3 @@
-
 __copyright__ = """
     Copyright 2021 Samapriya Roy
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,14 +15,17 @@ __license__ = "Apache 2.0"
 
 import requests
 import argparse
+import pkg_resources
 import time
 import sys
 import os
+import json
 import platform
 import subprocess
 from os.path import expanduser
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
+
 if str(platform.system().lower()) == "windows":
     # Get python runtime version
     version = sys.version_info[0]
@@ -75,6 +77,81 @@ import shapely.wkt
 # Checks for last 10 alerts
 MAIN_URL = "https://alertsdetail.awapps.com/launch?orgId=4007&launchCount=10"
 
+
+class Solution:
+    def compareVersion(self, version1, version2):
+        versions1 = [int(v) for v in version1.split(".")]
+        versions2 = [int(v) for v in version2.split(".")]
+        for i in range(max(len(versions1), len(versions2))):
+            v1 = versions1[i] if i < len(versions1) else 0
+            v2 = versions2[i] if i < len(versions2) else 0
+            if v1 > v2:
+                return 1
+            elif v1 < v2:
+                return -1
+        return 0
+
+
+ob1 = Solution()
+
+# Get package version
+def amwater_version():
+    url = "https://pypi.org/project/amwater/"
+    source = requests.get(url)
+    html_content = source.text
+    soup = BeautifulSoup(html_content, "html.parser")
+    company = soup.find("h1")
+    vcheck = ob1.compareVersion(
+        company.string.strip().split(" ")[-1],
+        pkg_resources.get_distribution("amwater").version,
+    )
+    if vcheck == 1:
+        print(
+            "\n"
+            + "========================================================================="
+        )
+        print(
+            "Current version of amwater is {} upgrade to lastest version: {}".format(
+                pkg_resources.get_distribution("amwater").version,
+                company.string.strip().split(" ")[-1],
+            )
+        )
+        print(
+            "========================================================================="
+        )
+    elif vcheck == -1:
+        print(
+            "\n"
+            + "========================================================================="
+        )
+        print(
+            "Possibly running staging code {} compared to pypi release {}".format(
+                pkg_resources.get_distribution("amwater").version,
+                company.string.strip().split(" ")[-1],
+            )
+        )
+        print(
+            "========================================================================="
+        )
+
+
+# amwater_version()
+
+# set credentials
+def setup(addr, webhook):
+    home = expanduser("~/amwater.json")
+    if webhook is not None:
+        data = {"home": addr, "webhook": webhook}
+    elif webhook is None:
+        data = {"home": addr, "webhook": ""}
+    with open(home, "w") as outfile:
+        json.dump(data, outfile)
+
+
+def setup_from_parser(args):
+    setup(addr=args.address, webhook=args.webhook)
+
+
 # Parse Geometry from alert url
 def geometry_parse(alert_url):
     alert_detail = requests.get(alert_url)
@@ -98,6 +175,18 @@ def geometry_parse(alert_url):
 
 # Water Alert from Ameren
 def water_alert(n, place):
+    home = expanduser("~/amwater.json")
+    if place is None:
+        if not os.path.exists(home):
+            place = input("Setup a default address to use: ")
+            setup(addr=place, webhook=None)
+            with open(home) as json_file:
+                data = json.load(json_file)
+                place = data.get("home")
+        else:
+            with open(home) as json_file:
+                data = json.load(json_file)
+                place = data.get("home")
     alert_list = requests.get(MAIN_URL)
     soup = BeautifulSoup(alert_list.text, "xml")
     alert_time = soup.find_all("AlertTime")
@@ -180,12 +269,22 @@ def main(args=None):
     )
     subparsers = parser.add_subparsers()
 
+    parser_setup = subparsers.add_parser(
+        "setup", help="Setup default address and optional (slack webhook) "
+    )
+    required_named = parser_setup.add_argument_group("Required named arguments.")
+    required_named.add_argument("--address", help="Your address", required=True)
+    optional_named = parser_setup.add_argument_group("Optional named arguments")
+    optional_named.add_argument(
+        "--webhook", help="Slack webhook experimental feature", default=None
+    )
+    parser_setup.set_defaults(func=setup_from_parser)
+
     parser_check = subparsers.add_parser(
         "amcheck", help="Check for any american water issued alerts for given adddress"
     )
-    required_named = parser_check.add_argument_group("Required named arguments.")
-    required_named.add_argument("--address", help="Your address", required=True)
     optional_named = parser_check.add_argument_group("Optional named arguments")
+    optional_named.add_argument("--address", help="Your address", default=None)
     optional_named.add_argument(
         "--days", help="Number of days to check for alert default is 1 day", default=1
     )
