@@ -265,7 +265,7 @@ def check_from_parser(args):
 
 def main(args=None):
     parser = argparse.ArgumentParser(
-        description="Alert CLI for American water: water alert"
+        description="Alert CLI for American water"
     )
     subparsers = parser.add_subparsers()
 

@@ -28,7 +28,7 @@ setuptools.setup(
     ],
     author='Samapriya Roy',
     author_email='samapriya.roy@gmail.com',
-    description='Alert CLI for American water: water alert',
+    description='Alert CLI for American water',
     entry_points={
         'console_scripts': [
             'amwater=amwater.amwater:main',
