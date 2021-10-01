@@ -2,7 +2,7 @@
 
 ![](https://tokei.rs/b1/github/samapriya/amwater?category=code)
 ![](https://tokei.rs/b1/github/samapriya/amwater?category=files)
-[![CI amwater](https://github.com/samapriya/amwater/actions/workflows/package_ci.yml/badge.svg)](https://github.com/samapriya/amwater/actions/workflows/package_ci.yml)
+[![CI amwater](https://github.com/samapriya/amwater/actions/workflows/ci-amwater.yml/badge.svg)](https://github.com/samapriya/amwater/actions/workflows/ci-amwater.yml)
 ![PyPI - License](https://img.shields.io/pypi/l/amwater)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/amwater)
 ![PyPI](https://img.shields.io/pypi/v/amwater)
