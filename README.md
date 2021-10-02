@@ -1,5 +1,6 @@
 # amwater: Alert CLI for American Water
 
+[![Twitter URL](https://img.shields.io/twitter/follow/samapriyaroy?style=social)](https://twitter.com/intent/follow?screen_name=samapriyaroy)
 ![](https://tokei.rs/b1/github/samapriya/amwater?category=code)
 ![](https://tokei.rs/b1/github/samapriya/amwater?category=files)
 [![CI amwater](https://github.com/samapriya/amwater/actions/workflows/ci-amwater.yml/badge.svg)](https://github.com/samapriya/amwater/actions/workflows/ci-amwater.yml)
