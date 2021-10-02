@@ -17,10 +17,10 @@ jobs:
           python-version: '3.7.7' # install the python version needed
           
       - name: install python packages
+	env:
+	   addr: ${{SECRETS.ADDR}}
+	   slack_hook : ${{SECRETS.SLACK_HOOK}}
         run: |
-	  env:
-	     addr: ${{SECRETS.ADDR}}
-	     slack_hook : ${{SECRETS.SLACK_HOOK}}
           python -m pip install --upgrade pip
           pip install -U pip setuptools
           pip install amwater
