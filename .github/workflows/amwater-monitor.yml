@@ -17,8 +17,8 @@ jobs:
       env:
           ADDR: ${{SECRETS.ADDR}}
           SLACK_HOOK : ${{SECRETS.SLACK_HOOK}}
-      run: |
-        python --version
+      run: python --version
+    
     - name: install packages
         run:|
           python -m pip install --upgrade pip
