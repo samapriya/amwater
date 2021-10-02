@@ -27,6 +27,6 @@ jobs:
         with:
           script: |
             import subprocess
-			      addr = ${{SECRETS.ADDR}}
-			      slack_hook = ${{SECRETS.SLACK_HOOK}}
-			      subprocess.call(f'amwater check --address {addr} --webhook {slack_hook}')
+	    addr = ${{SECRETS.ADDR}}
+	    slack_hook = ${{SECRETS.SLACK_HOOK}}
+	    subprocess.call(f'amwater check --address {addr} --webhook {slack_hook}')
