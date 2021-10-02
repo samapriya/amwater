@@ -8,7 +8,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-
       - name: checkout repo content
         uses: actions/checkout@v2 # checkout the repository content to github runner
 
@@ -19,6 +18,9 @@ jobs:
           
       - name: install python packages
         run: |
+	  env:
+	     addr: ${{SECRETS.ADDR}}
+	     slack_hook : ${{SECRETS.SLACK_HOOK}}
           python -m pip install --upgrade pip
           pip install -U pip setuptools
           pip install amwater
@@ -27,6 +29,6 @@ jobs:
         with:
           script: |
             import subprocess
-	    addr = ${{SECRETS.ADDR}}
-	    slack_hook = ${{SECRETS.SLACK_HOOK}}
+	    addr = os.environment['addr']
+	    slack_hook = os.environment['slack_hook']
 	    subprocess.call(f'amwater check --address {addr} --webhook {slack_hook}')
