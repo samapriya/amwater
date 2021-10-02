@@ -33,4 +33,4 @@ jobs:
           import os
           addr = os.environ['ADDR']
           slack_hook = os.environ['SLACK_HOOK']
-          os.system(f'amwater check --address {addr} --webhook {slack_hook}')
+          os.system(f'amwater check --address "{addr}" --webhook {slack_hook}')
