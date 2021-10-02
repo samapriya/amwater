@@ -24,10 +24,13 @@ jobs:
     
     - name: script check
       uses: jannekem/run-python-script-action@v1
+      env:
+          ADDR: ${{SECRETS.ADDR}}
+          SLACK_HOOK : ${{SECRETS.SLACK_HOOK}}
       with:
         script: |
           import subprocess
           import os
           addr = os.environ['ADDR']
           slack_hook = os.environ['SLACK_HOOK']
-          subprocess.call(f'amwater check --address {addr} --webhook {slack_hook}')
+          os.system(f'amwater check --address {addr} --webhook {slack_hook}')
