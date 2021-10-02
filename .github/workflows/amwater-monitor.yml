@@ -1,0 +1,32 @@
+name: amwater persistent
+on: 
+  workflow_dispatch:
+  schedule:
+    - cron:  '0 * * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: checkout repo content
+        uses: actions/checkout@v2 # checkout the repository content to github runner
+
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7.7' # install the python version needed
+          
+      - name: install python packages
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U pip setuptools
+          pip install amwater
+      - name: Script check
+        uses: jannekem/run-python-script-action@v1
+        with:
+          script: |
+            import subprocess
+			      addr = ${{SECRETS.ADDR}}
+			      slack_hook = ${{SECRETS.SLACK_HOOK}}
+			      subprocess.call(f'amwater check --address {addr} --webhook {slack_hook}')
