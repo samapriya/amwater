@@ -136,7 +136,7 @@ def amwater_version():
         )
 
 
-# amwater_version()
+amwater_version()
 
 # set credentials
 def setup(addr, webhook):
@@ -162,7 +162,7 @@ def geometry_parse(alert_url):
         alert_detail = requests.get(alert_url, headers=headers)
     except Exception as e:
         pass
-    if alert_detail.status_code==200:
+    if alert_detail.status_code == 200:
         soup = BeautifulSoup(alert_detail.text, "xml")
         alert_geom = soup.find_all("script", type="text/javascript")
         for geoms in alert_geom:
