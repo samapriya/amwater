@@ -27,6 +27,7 @@ jobs:
       with:
         script: |
           import subprocess
+          import os
           addr = os.environment['ADDR']
           slack_hook = os.environment['SLACK_HOOK']
           subprocess.call(f'amwater check --address {addr} --webhook {slack_hook}')
