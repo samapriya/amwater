@@ -23,7 +23,7 @@ This assumes that you have native python & pip installed in your system, you can
 
 **amwater only support Python v3.4 or higher**
 
-To install **amwater: Simple CLI for SofarOcean API** you can install using two methods.
+To install **amwater: Alert CLI for American Water** you can install using two methods.
 
 ```pip install amwater```
 
